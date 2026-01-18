@@ -1,0 +1,4 @@
+{
+  "prisma.enableCodeLens": true,
+  "prettier.embeddedLanguageFormatting": "auto"
+}
