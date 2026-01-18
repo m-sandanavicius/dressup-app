@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: `%s | iVape`,
+    template: `%s | DressUp`,
     default: APP_NAME,
   },
   description: APP_DESCRIPTION,
