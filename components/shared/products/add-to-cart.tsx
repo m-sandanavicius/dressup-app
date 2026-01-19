@@ -3,18 +3,19 @@
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { addItemToCart, removeItemFromCart } from '@/lib/actions/cart.actions';
-import { Cart, CartItem } from '@/types';
+import { CartItem } from '@/types';
 import { ToastAction } from '@radix-ui/react-toast';
 import { Loader, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export default function AddToCart({
   item,
   cart,
 }: {
   item: CartItem;
-  cart: Cart;
+  cart: any;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -60,7 +61,7 @@ export default function AddToCart({
   };
 
   const existItem =
-    cart && cart.items.find((i) => i.productId === item.productId);
+    cart && cart.items.find((i: any) => i.productId === item.productId);
 
   return existItem ? (
     <div>

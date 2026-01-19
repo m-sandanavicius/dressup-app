@@ -45,7 +45,7 @@ export async function removeItemFromCart(productId: string) {
       throw new Error('Product not found');
     }
 
-    let foundItem = cart.items.find((i) => i.productId === productId);
+    const foundItem = cart.items.find((i) => i.productId === productId);
     if (!foundItem) throw new Error('Item not found');
 
     const quantity = foundItem.quantity;
@@ -121,7 +121,7 @@ export async function addItemToCart(cartItem: CartItem) {
         message: `${product.name} added to cart`,
       };
     } else {
-      let existItem = (cart.items as CartItem[]).find(
+      const existItem = (cart.items as CartItem[]).find(
         (i) => i.productId === item.productId,
       );
 

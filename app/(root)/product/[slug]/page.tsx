@@ -1,5 +1,4 @@
 import ProductPrice from '@/components/shared/products/product-price';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getProductBySlug } from '@/lib/actions/product.actions';
 import { Badge } from '@/components/ui/badge';
