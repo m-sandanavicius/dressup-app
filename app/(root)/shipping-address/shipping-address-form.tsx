@@ -5,7 +5,7 @@ import { shippingAddressDefaultValues } from '@/lib/constants';
 import { shippingAddressSchema } from '@/lib/validators';
 import { ShippingAddress } from '@/types';
 import { useRouter } from 'next/navigation';
-import { ControllerRenderProps, useForm } from 'react-hook-form';
+import { ControllerRenderProps, useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader } from 'lucide-react';
+import { updateUserAddress } from '@/lib/actions/user.actions';
 
 export default function ShippingAddressForm({
   address,
@@ -36,9 +37,20 @@ export default function ShippingAddressForm({
 
   const [isPending, startTransition] = useTransition();
 
-  const onSubmit = (values) => {
-    console.log(values);
-    return;
+  const onSubmit: SubmitHandler<z.infer<typeof shippingAddressSchema>> = async (
+    shippingAddress,
+  ) => {
+    startTransition(async () => {
+      const res = await updateUserAddress(shippingAddress);
+      if (!res.success) {
+        toast({
+          variant: 'destructive',
+          description: res.message,
+        });
+      }
+
+      router.push('/payment-method');
+    });
   };
 
   return (
