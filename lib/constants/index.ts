@@ -17,3 +17,11 @@ export const signUpDefaultValues = {
   password: '',
   confirmPassword: '',
 };
+
+export const shippingAddressDefaultValues = {
+  fullName: 'John Boe',
+  streetAddress: 'Ukmerges 19',
+  city: 'Vilnius',
+  postalCode: '04000',
+  country: 'Lithuania',
+};
