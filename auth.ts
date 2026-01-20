@@ -4,6 +4,7 @@ import { prisma } from '@/db/prisma';
 import { cookies } from 'next/headers';
 import { compareSync } from 'bcrypt-ts-edge';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { CartItem } from './types';
 
 export const config = {
   pages: {
@@ -93,16 +94,41 @@ export const config = {
               where: { sessionCartId },
             });
 
-            if (sessionCart) {
-              // Delete current user cart
-              await prisma.cart.deleteMany({
-                where: { userId: user.id },
-              });
+            const userCart = await prisma.cart.findFirst({
+              where: { userId: user.id },
+            });
 
-              // Assign new cart
-              await prisma.cart.update({
+            if (sessionCart) {
+              if (userCart) {
+                await prisma.cart.delete({
+                  where: { id: userCart.id },
+                });
+              }
+              await prisma.cart.upsert({
                 where: { id: sessionCart.id },
-                data: { userId: user.id },
+                update: { userId: user.id },
+                create: {
+                  id: sessionCart.id,
+                  userId: user.id,
+                  sessionCartId: sessionCartId,
+                  items: sessionCart.items as CartItem[],
+                  itemsPrice: sessionCart.itemsPrice,
+                  totalPrice: sessionCart.totalPrice,
+                  shippingPrice: sessionCart.shippingPrice,
+                  taxPrice: sessionCart.taxPrice,
+                },
+              });
+            } else if (!userCart) {
+              await prisma.cart.create({
+                data: {
+                  userId: user.id,
+                  sessionCartId: sessionCartId,
+                  items: [],
+                  itemsPrice: 0,
+                  totalPrice: 0,
+                  shippingPrice: 0,
+                  taxPrice: 0,
+                },
               });
             }
           }
