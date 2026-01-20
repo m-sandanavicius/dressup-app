@@ -9,18 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Toast } from '@/components/ui/toast';
 import { useToast } from '@/hooks/use-toast';
 import { addItemToCart, removeItemFromCart } from '@/lib/actions/cart.actions';
 import { Cart } from '@/types';
 import { Loader, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
 export default function CartTable({ cart }: { cart?: Cart }) {
-  const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
