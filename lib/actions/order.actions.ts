@@ -93,32 +93,28 @@ export async function createOrder() {
 }
 
 export async function getOrderById(orderId: string) {
-  try {
-    const session = await auth();
+  const session = await auth();
 
-    if (!session) throw new Error('User not authenticated');
+  if (!session) throw new Error('User not authenticated');
 
-    const userId = session.user?.id;
+  const userId = session.user?.id;
 
-    if (!userId) throw new Error('User not authenticated');
+  if (!userId) throw new Error('User not authenticated');
 
-    const order = await prisma.order.findFirst({
-      where: { id: orderId, userId: userId },
-      include: {
-        orderItems: true,
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
+  const order = await prisma.order.findFirst({
+    where: { id: orderId },
+    include: {
+      orderItems: true,
+      user: {
+        select: {
+          name: true,
+          email: true,
         },
       },
-    });
+    },
+  });
 
-    if (!order) throw new Error('Order not found');
+  if (!order) throw new Error('Order not found');
 
-    return convertToPlainObject(order);
-  } catch (error) {
-    return { success: false, message: formatError(error) };
-  }
+  return convertToPlainObject(order);
 }
