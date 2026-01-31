@@ -1,5 +1,4 @@
 import { getOrderById } from '@/lib/actions/order.actions';
-import { Order } from '@/types';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -12,9 +11,9 @@ export default async function OrderDetailsPage(props: {
 }) {
   const { id } = await props.params;
 
-  const order = (await getOrderById(id)) as Order;
+  const order = await getOrderById(id);
 
   if (!order) notFound();
 
-  return <>{order.totalPrice}</>;
+  return <>order details page</>;
 }

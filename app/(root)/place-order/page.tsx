@@ -14,7 +14,6 @@ import { getCart } from '@/lib/actions/cart.actions';
 import { getUserById } from '@/lib/actions/user.actions';
 import { formatCurrency } from '@/lib/utils';
 import { ShippingAddress } from '@/types';
-import { Car } from 'lucide-react';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
