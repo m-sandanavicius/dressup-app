@@ -27,6 +27,7 @@ export default async function OrderDetailsPage(props: {
           email: order.user.email || '',
         },
       }}
+      paypalClientId={process.env.PAYPAL_CLIENT_ID || ''}
     />
   );
 }
