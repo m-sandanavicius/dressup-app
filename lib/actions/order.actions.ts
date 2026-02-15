@@ -11,6 +11,8 @@ import { prisma } from '@/db/prisma';
 import { CartItem, PaymentResult } from '@/types';
 import { paypal } from '../paypal';
 import { revalidatePath } from 'next/cache';
+import { PAGE_SIZE } from '../constants';
+import { Prisma } from '@prisma/client';
 
 export async function createOrder() {
   try {
@@ -253,4 +255,72 @@ async function updateOrderToPaid({
   }
 }
 
+export async function getMyOrders({
+  limit = PAGE_SIZE,
+  page,
+}: {
+  limit?: number;
+  page: number;
+}) {
+  const session = await auth();
+  if (!session) throw new Error('User is not authorized');
+
+  const orders = await prisma.order.findMany({
+    where: { userId: session?.user?.id! },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    skip: (page - 1) * limit,
+  });
+
+  const ordersCount = await prisma.order.count({
+    where: { userId: session?.user?.id! },
+  });
+
+  return {
+    data: orders,
+    totalPages: Math.ceil(ordersCount / limit),
+  };
+}
+
 export { updateOrderToPaid };
+
+type SalesDataType = {
+  month: string;
+  totalSales: number;
+};
+
+export async function gerOrderSummary() {
+  const ordersCount = await prisma.order.count();
+  const productsCount = await prisma.product.count();
+  const usersCount = await prisma.user.count();
+
+  const totalSales = await prisma.order.aggregate({
+    _sum: { totalPrice: true },
+  });
+
+  const salesDataRaw = await prisma.$queryRaw<
+    Array<{ month: string; totalSales: Prisma.Decimal }>
+  >`SELECT to_char("created_at", "MM/YY") as "month", sum("totalPrice") as "totalSales" FROM "Order" GROUP BY ("createdAt", "MM/YY")`;
+
+  const salesData: SalesDataType[] = salesDataRaw.map((e) => ({
+    month: e.month,
+    totalSales: Number(e.totalSales),
+  }));
+
+  const latestSales = await prisma.order.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: { select: { name: true } },
+    },
+    take: 6,
+  });
+
+  return {
+    ordersCount,
+    productsCount,
+    usersCount,
+    totalSales,
+    latestSales,
+    salesData,
+  };
+}
