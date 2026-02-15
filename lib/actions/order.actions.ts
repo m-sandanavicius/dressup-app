@@ -263,17 +263,17 @@ export async function getMyOrders({
   page: number;
 }) {
   const session = await auth();
-  if (!session) throw new Error('User is not authorized');
+  if (!session || !session.user.id) throw new Error('User is not authorized');
 
   const orders = await prisma.order.findMany({
-    where: { userId: session?.user?.id! },
+    where: { userId: session?.user?.id },
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: (page - 1) * limit,
   });
 
   const ordersCount = await prisma.order.count({
-    where: { userId: session?.user?.id! },
+    where: { userId: session?.user?.id },
   });
 
   return {
@@ -300,7 +300,7 @@ export async function gerOrderSummary() {
 
   const salesDataRaw = await prisma.$queryRaw<
     Array<{ month: string; totalSales: Prisma.Decimal }>
-  >`SELECT to_char("created_at", "MM/YY") as "month", sum("totalPrice") as "totalSales" FROM "Order" GROUP BY ("createdAt", "MM/YY")`;
+  >`SELECT to_char("createdAt", 'MM/YY') as "month", sum("totalPrice") as "totalSales" FROM "Order" GROUP BY to_char("createdAt", 'MM/YY')`;
 
   const salesData: SalesDataType[] = salesDataRaw.map((e) => ({
     month: e.month,

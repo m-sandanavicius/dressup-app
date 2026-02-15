@@ -2,7 +2,7 @@ import { getOrderById } from '@/lib/actions/order.actions';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import OrderDetailsTable from './order-details-table';
-import { Order, ShippingAddress } from '@/types';
+import { ShippingAddress } from '@/types';
 
 export const metadata: Metadata = {
   title: 'Order Details',
