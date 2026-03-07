@@ -324,3 +324,42 @@ export async function gerOrderSummary() {
     salesData,
   };
 }
+
+export async function getAllOrders({
+  limit = PAGE_SIZE,
+  page,
+}: {
+  limit?: number;
+  page: number;
+}) {
+  const orders = await prisma.order.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    skip: (page - 1) * limit,
+    include: {
+      user: { select: { name: true } },
+    },
+  });
+
+  const ordersCount = await prisma.order.count();
+
+  return {
+    data: orders,
+    totalPages: Math.ceil(ordersCount / limit),
+  };
+}
+
+export async function deleteOrder(id: string) {
+  try {
+    await prisma.order.delete({
+      where: { id },
+    });
+
+    revalidatePath('/admin/orders');
+
+    return { success: true, message: 'Order deleted successfully' };
+  } catch (error) {
+    console.error('Failed to delete order:', error);
+    return { success: false, message: formatError(error) };
+  }
+}
