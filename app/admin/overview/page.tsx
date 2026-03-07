@@ -13,21 +13,17 @@ import { formatCurrency, formatDateTime, formatNumber } from '@/lib/utils';
 import { BadgeDollarSign, Barcode, CreditCard, Users } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Charts from './charts';
+import { requireAdmin } from '@/lib/auth.guard';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard Overview',
 };
 
 export default async function AdminOverviewPage() {
-  const session = await auth();
-
-  if (session?.user?.role !== 'admin') {
-    throw new Error('User is not authorized');
-  }
+  await requireAdmin();
 
   const orderSummary = await gerOrderSummary();
-
-  console.log(orderSummary);
 
   return (
     <div className="space-y-2">
@@ -89,7 +85,13 @@ export default async function AdminOverviewPage() {
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent></CardContent>
+          <CardContent>
+            <Charts
+              data={{
+                salesData: orderSummary.salesData,
+              }}
+            />
+          </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
