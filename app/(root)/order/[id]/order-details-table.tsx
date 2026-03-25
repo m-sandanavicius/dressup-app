@@ -22,15 +22,21 @@ import Link from 'next/link';
 import {
   approvePaypalOrder,
   createPayPalOrder,
+  updateOrderToPaidCOD,
+  updatedOrderToDelivered,
 } from '@/lib/actions/order.actions';
 import { useToast } from '@/hooks/use-toast';
+import { useTransition } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function OrderDetailsTable({
   order,
   paypalClientId,
+  isAdmin,
 }: {
   order: Order;
   paypalClientId: string;
+  isAdmin: boolean;
 }) {
   const { toast } = useToast();
 
@@ -81,6 +87,52 @@ export default function OrderDetailsTable({
       variant: res.success ? 'default' : 'destructive',
       description: res.message,
     });
+  };
+
+  const MarkAsPaidButton = () => {
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
+    return (
+      <Button
+        type="button"
+        disabled={isPending}
+        onClick={() =>
+          startTransition(async () => {
+            const res = await updateOrderToPaidCOD(order.id);
+            toast({
+              variant: res.success ? 'default' : 'destructive',
+              description: res.message,
+            });
+          })
+        }
+      >
+        {isPending ? 'loading...' : 'Mark As Paid'}
+      </Button>
+    );
+  };
+
+  const MarkAsDeliveredButton = () => {
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
+    return (
+      <Button
+        type="button"
+        disabled={isPending}
+        onClick={() =>
+          startTransition(async () => {
+            const res = await updatedOrderToDelivered(order.id);
+            toast({
+              variant: res.success ? 'default' : 'destructive',
+              description: res.message,
+            });
+          })
+        }
+      >
+        {isPending ? 'loading...' : 'Mark As Delivered'}
+      </Button>
+    );
   };
 
   return (
@@ -188,6 +240,12 @@ export default function OrderDetailsTable({
                   </PayPalScriptProvider>
                 </div>
               )}
+
+              {isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (
+                <MarkAsPaidButton />
+              )}
+
+              {isAdmin && isPaid && !isDelivered && <MarkAsDeliveredButton />}
             </CardContent>
           </Card>
         </div>

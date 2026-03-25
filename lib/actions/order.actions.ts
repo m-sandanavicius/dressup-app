@@ -13,6 +13,7 @@ import { paypal } from '../paypal';
 import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
 import { Prisma } from '@prisma/client';
+import { _success } from 'zod/v4/core';
 
 export async function createOrder() {
   try {
@@ -360,6 +361,47 @@ export async function deleteOrder(id: string) {
     return { success: true, message: 'Order deleted successfully' };
   } catch (error) {
     console.error('Failed to delete order:', error);
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function updateOrderToPaidCOD(orderId: string) {
+  try {
+    await updateOrderToPaid({ orderId });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return { success: true, message: 'Order marked as paid' };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function updatedOrderToDelivered(orderId: string) {
+  try {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+      },
+    });
+
+    if (!order) throw new Error('Order not found');
+    if (!order.isPaid) throw new Error('Order is not paid');
+
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        isDelivered: true,
+        deliveredAt: new Date(),
+      },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return { success: true, message: 'Order marked as delivered' };
+  } catch (error) {
     return { success: false, message: formatError(error) };
   }
 }
